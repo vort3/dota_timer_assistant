@@ -38,8 +38,8 @@ HERO_DATA = {}  # dictionary of Dota hero data, read in from HERO_DATA_FILE
 
 heroes = {}  # dictionary of enemy heroes in the game, addressed by hero name
 
-timer_running = map(lambda i: False, range(6))
-timer_time_left = map(lambda i: 0, range(6))
+timer_running = [False] * 6
+timer_time_left = [0] * 6
 
 accept_hotkeys = True
 
@@ -337,7 +337,6 @@ def watch_timers():
 
     while True:
         timer_info_queue.put(timers_string.format(*timer_time_left))
-
         time.sleep(1)
 
 
@@ -391,12 +390,15 @@ def listen_for_voice_msgs():
 
 
 def run_overlay():
+    global app
     app = gui.Overlay()
-
-    app.after(100, app.update_info)
-
     app.mainloop()
-    app.root.destroy()
+
+
+def update_overlay():
+    while True:
+        app.after(0, app.update_info(timer_time_left, notification_queue))
+        time.sleep(0.2)
 
 
 def run():
@@ -411,6 +413,11 @@ def run():
 
     overlay_runner = Thread(target=run_overlay, name="Overlay Runner")
     overlay_runner.start()
+    
+    time.sleep(1) # overlay_updater may run faster, than overlay_runner starts
+    
+    overlay_updater = Thread(target=update_overlay, name="Overlay Updater")
+    overlay_updater.start()
 
     listen_for_voice_msgs()  # voice messages have to run on the main thread
 
@@ -437,6 +444,5 @@ def main():
 
 
 if __name__ == '__main__':
-    test.run()
-    # main()
-
+    # test.run()
+    main()

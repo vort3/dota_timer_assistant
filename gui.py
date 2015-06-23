@@ -2,17 +2,14 @@ __author__ = 'Dan'
 
 import Tkinter as Tk
 
-import dota_timer
 
 class Overlay(Tk.Frame):
-    def update_info(self):
-        for i, time in enumerate(dota_timer.timer_time_left):
+    def update_info(self, timer, queue):
+        for i, time in enumerate(timer):
             self.timers[i]['text'] = time
+        if not queue.empty():
+            self.notification['text'] = queue.get()
 
-        if not dota_timer.notification_queue.empty():
-            self.notification['text'] = dota_timer.notification_queue.get()
-
-        self.root.after(100, self.update_info)
 
     def __init__(self):
         self.root = Tk.Tk()
@@ -31,7 +28,7 @@ class Overlay(Tk.Frame):
 
         self.timers = []
         self.init_timers()
-
+        
         self.right_side = Tk.Frame(self.root, height=40, padx=8)
         self.right_side.pack(side=Tk.RIGHT)
 
@@ -52,5 +49,5 @@ class Overlay(Tk.Frame):
 
     def init_timers(self):
         for i in range(6):
-            self.timers.append(Tk.Label(self.timers_time, text='', width=8))
+            self.timers.append(Tk.Label(self.timers_time, text='', width=4, padx=13))
             self.timers[i].pack(side=Tk.LEFT)
